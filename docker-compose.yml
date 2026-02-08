@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     container_name: pet-db
     environment:
-      POSTGRES_DB: petdb
-      POSTGRES_USER: petuser
-      POSTGRES_PASSWORD: petpass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U petuser -d petdb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -21,7 +21,7 @@ services:
       context: .
     container_name: events-app
     environment:
-      DATABASE_URL: postgresql+psycopg://petuser:petpass@db:5432/petdb
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "8000:8000"
     depends_on:
