@@ -9,13 +9,20 @@ from app.schemas.event import EventIn, EventOut
 router = APIRouter()
 
 
-@router.get("/health")
-def health(db: Session = Depends(get_db)):
+@router.get("/healthz")
+def healthz():
+    # liveness: процесс жив, без проверок зависимостей
+    return {"status": "ok"}
+
+
+@router.get("/readyz")
+def readyz(db: Session = Depends(get_db)):
+    # readiness: сервис готов обслуживать запросы (БД доступна)
     try:
         db.execute(select(1))
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"db_unavailable: {type(e).__name__}")
-    return {"status": "ok"}
+    except Exception:
+        raise HTTPException(status_code=503, detail="db_unavailable")
+    return {"status": "ready"}
 
 
 @router.post("/events", response_model=EventOut, status_code=201)
